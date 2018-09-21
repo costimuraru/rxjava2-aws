@@ -175,7 +175,7 @@ public final class Sqs {
         Preconditions.checkNotNull(logger);
         return Flowable.using(sqsFactory,
                 sqs -> createFlowableWithSqs(sqs, s3Factory, sqsFactory, queueName, bucketName, waitTimesSeconds, logger),
-                sqs -> sqs.shutdown());
+                sqs -> {});
     }
 
     private static Flowable<SqsMessage> createFlowableWithSqs(AmazonSQS sqs, Optional<Callable<AmazonS3>> s3Factory,

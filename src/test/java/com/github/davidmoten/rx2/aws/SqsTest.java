@@ -58,6 +58,7 @@ public final class SqsTest {
                 .messages() //
                 .map(m -> m.message()) //
                 .doOnError(Throwable::printStackTrace) //
+                .doFinally(sqs::shutdown)
                 .take(1) //
                 .test() //
                 .awaitDone(10, TimeUnit.SECONDS) //
@@ -83,6 +84,7 @@ public final class SqsTest {
                 .messages() //
                 .map(m -> m.message()) //
                 .doOnError(Throwable::printStackTrace) //
+                .doFinally(sqs::shutdown)
                 .test(0) //
                 .requestMore(1) //
                 .assertValue("body1")//
@@ -108,6 +110,7 @@ public final class SqsTest {
                 .messages() //
                 .map(m -> m.message()) //
                 .doOnError(Throwable::printStackTrace) //
+                .doFinally(sqs::shutdown)
                 .take(2) //
                 .test() //
                 .awaitDone(10, TimeUnit.SECONDS) //
@@ -147,6 +150,8 @@ public final class SqsTest {
                 .doOnNext(SqsMessage::deleteMessage) //
                 .map(m -> m.message()) //
                 .doOnError(Throwable::printStackTrace) //
+                .doFinally(sqs::shutdown)
+                .doFinally(s3::shutdown)
                 .take(1) //
                 .test() //
                 .awaitDone(10, TimeUnit.SECONDS) //
@@ -200,6 +205,8 @@ public final class SqsTest {
                 .doOnNext(SqsMessage::deleteMessage) //
                 .map(m -> m.message()) //
                 .doOnError(Throwable::printStackTrace) //
+                .doFinally(sqs::shutdown)
+                .doFinally(s3::shutdown)
                 .take(1) //
                 .test() //
                 .awaitDone(10, TimeUnit.SECONDS) //
@@ -266,6 +273,7 @@ public final class SqsTest {
                 .messages() //
                 .map(m -> m.message()) //
                 .doOnError(Throwable::printStackTrace) //
+                .doFinally(sqs::shutdown)
                 .test() //
                 .assertNoValues() //
                 .assertNotTerminated();

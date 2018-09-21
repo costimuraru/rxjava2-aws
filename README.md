@@ -47,10 +47,15 @@ Sqs.queueName("my-queue")
    // run in the background
    .subscribeOn(Schedulers.io())
    // any errors then delay and resubscribe (on an io thread)
-   .retryWhen(RetryWhen
-         .delay(30, TimeUnit.SECONDS) 
-         .scheduler(Schedulers.io())
-         .build())
+   .retryWhen(errors -> {
+       AtomicInteger counter = new AtomicInteger();
+       return errors.flatMap(e -> {
+           int attempt = counter.incrementAndGet();
+           System.out.println("Will retry to read SQS messages in " + attempt + " second(s).");
+           return Flowable.timer(attempt, TimeUnit.SECONDS);
+       });
+   })
+   .doFinally(sqs::shutdown)
    // go!
    .subscribe(subscriber);
 ```
@@ -67,6 +72,7 @@ Sqs.queueName("my-queue")
    .interval(60, TimeUnit.SECONDS, Schedulers.io())
    // get messages as observable
    .messages()
+   .doFinally(sqs::shutdown)
    ...
 ```
 
@@ -82,6 +88,7 @@ Sqs.queueName("my-queue")
        TimeUnit.SECONDS)
    // get messages as observable
    .messages()
+   .doFinally(sqs::shutdown)
    ...
 ```
 
@@ -112,10 +119,15 @@ Sqs.queueName("my-queue")
    // run in the background
    .subscribeOn(Schedulers.io())
    // any errors then delay and resubscribe (on an io thread)
-   .retryWhen(RetryWhen
-         .delay(30, TimeUnit.SECONDS) 
-         .scheduler(Schedulers.io())
-         .build())
+   .retryWhen(errors -> {
+       AtomicInteger counter = new AtomicInteger();
+       return errors.flatMap(e -> {
+           int attempt = counter.incrementAndGet();
+           System.out.println("Will retry to read SQS messages in " + attempt + " second(s).");
+           return Flowable.timer(attempt, TimeUnit.SECONDS);
+       });
+   })
+   .doFinally(sqs::shutdown)
    // go!
    .subscribe(subscriber);
 ```  
@@ -142,6 +154,7 @@ SqsMessage message =
       .s3Factory(s3)
       .messages()
       .subscribeOn(Schedulers.io())
+      .doFinally(sqs::shutdown)
       .blockingFirst();
       
 // this will still work fine        
